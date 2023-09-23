@@ -10,6 +10,7 @@
 * Visual Studio Code v1.82.2
 * PlatformioIO Core v6.1.11
 * ESP-IDF v5.1.1 см инструкцию по установке https://registry.platformio.org/tools/platformio/framework-espidf
+* ![Плата esp32doit-devkit-v1, пока без LAN](/img/esp32_devkit_v1.png) стоит припаять кондесатор 5-10 мкф параллельно кнопке EN, обеспечивает более стабильную перезагрузку платы при прошивке, не требуется нажимать кнопки https://esp8266.ru/forum/threads/v-klon-esp32-devkit-v1-avtomaticheski-ne-zalivaetsja-proshivka.4072/
 
 
 ### Особенности
