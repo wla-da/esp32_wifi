@@ -7,13 +7,13 @@
 с модификацией определенных данных лету
 
 ### Окружение 
-Visual Studio Code v1.82.2
-PlatformioIO Core v6.1.11
-ESP-IDF v5.1.1 см инструкцию по установке https://registry.platformio.org/tools/platformio/framework-espidf
+* Visual Studio Code v1.82.2
+* PlatformioIO Core v6.1.11
+* ESP-IDF v5.1.1 см инструкцию по установке https://registry.platformio.org/tools/platformio/framework-espidf
 
 
 ### Особенности
-в ESP-IDF v5 стала более жесткая проверка типов данных
+* в ESP-IDF v5 стала более жесткая проверка типов данных, 
 см https://github.com/espressif/esp-idf/issues/9511
 format '%d' expects argument of type 'int', but argument 6 has type 'uint32_t' {aka 'long unsigned int'} [-Werror=format=]
 https://github.com/espressif/esp-protocols/commit/71401a0f2ffb5a0b374a692e50e4fa7d0e12397b
