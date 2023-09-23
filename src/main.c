@@ -3,21 +3,35 @@
 #include "esp_sleep.h"
 #include "sys/unistd.h" //для usleep
 #include "soc/rtc.h"
+#include "nvs_flash.h"
+#include "esp_app_format.h"
+//#include "esp_app_desc.h" в esp-idf v5
 
-
+#include "wifi.h"
 
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #define TAG "MAIN"
 
 
-
+//вывод общей информации  о системе для отладки
 void print_chip_info() {
     ESP_LOGI(TAG, "Free heap %d kb, minimum %d kb", esp_get_free_heap_size()>>10, esp_get_minimum_free_heap_size()>>10);
     
     esp_chip_info_t chip_info;
     esp_chip_info(&chip_info);
     ESP_LOGI(TAG, "CPU core %d", chip_info.cores);
-       
+    ESP_LOGI(TAG, "CPU revision %d", chip_info.revision);
+
+    //информация о версии приложения esp_app_get_description() или esp_app_get_elf_sha256()/esp_ota_get_partition_description()
+    //в esp-idf v5
+    /*
+    esp_app_desc_t *app_desc = esp_app_get_description();
+    
+    ESP_LOGI(TAG, "Project: %s", app_desc->project_name);
+    ESP_LOGI(TAG, "App version: %s", app_desc->version);
+    ESP_LOGI(TAG, "Compile date: %s %s", app_desc->date, app_desc->time);
+    */
+
     //установить частоту работы CPU
     //void rtc_clk_cpu_freq_set_config(const rtc_cpu_freq_config_t* config);
     rtc_cpu_freq_config_t cpu_freq;
@@ -31,12 +45,8 @@ void print_chip_info() {
 
 void app_main() {
 
-    while (true)
-    {
-        print_chip_info();
-        usleep(5L*1000*1000);
-    }
-        
+    usleep(3L*1000*1000); //костыль, чтобы успел подключиться монитор USB порта
+    print_chip_info();
 
-
+    wifi_scan(10);
 }

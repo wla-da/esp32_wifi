@@ -1,0 +1,53 @@
+{
+    "platformio-ide.customPATH": "",
+    "platformio-ide.toolbar": [
+
+        {
+            "text": "$(home)",
+            "tooltip": "PlatformIO: Home",
+            "commands": "platformio-ide.showHome"
+        },
+        {
+            "text": "$(check)",
+            "tooltip": "PlatformIO: Build",
+            "commands": "platformio-ide.build"
+        },
+        {
+            "text": "$(arrow-right)",
+            "tooltip": "PlatformIO: Upload and Monitor",
+            "commands": "platformio-ide.uploadAndMonitor"
+        },
+        {
+            "text": "$(trashcan)",
+            "tooltip": "PlatformIO: Clean",
+            "commands": "platformio-ide.clean"
+        },
+        {
+            "text": "$(beaker)",
+            "tooltip": "PlatformIO: Test",
+            "commands": "platformio-ide.test"
+        },
+        {
+            "text": "$(plug)",
+            "tooltip": "PlatformIO: Serial Monitor",
+            "commands": "platformio-ide.serialMonitor"
+        },
+        {
+            "text": "$(terminal)",
+            "tooltip": "PlatformIO: New Terminal",
+            "commands": "platformio-ide.newTerminal"
+        }
+    ],
+    "files.associations": {
+        "nvs.h": "c",
+        "*.tcc": "c",
+        "chrono": "c",
+        "codecvt": "c",
+        "string_view": "c",
+        "algorithm": "c",
+        "random": "c",
+        "istream": "c",
+        "limits": "c",
+        "math.h": "c"
+    }
+}
