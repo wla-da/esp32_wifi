@@ -48,6 +48,7 @@
         "random": "c",
         "istream": "c",
         "limits": "c",
-        "math.h": "c"
+        "math.h": "c",
+        "esp_err.h": "c"
     }
 }

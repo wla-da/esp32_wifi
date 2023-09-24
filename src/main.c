@@ -9,6 +9,11 @@
 #include "esp_app_desc.h" //в esp-idf v5
 
 #include "wifi.h"
+#include "webclient.h"
+
+
+#define CONFIG_EXAMPLE_HTTP_HOST        "192.168.4.73"
+#define CONFIG_EXAMPLE_HTTP_PORT        80
 
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #define TAG "MAIN"
@@ -43,6 +48,40 @@ void print_chip_info() {
 }
 
 
+
+
+void get_and_read() {
+    const uint32_t buf_len = 1024;
+    char *buffer = malloc(buf_len + 1);
+    memset(buffer, 0, buf_len + 1);
+    if (buffer == NULL) {
+        ESP_LOGE(TAG, "Cannot malloc http receive buffer");
+        return;
+    }
+
+    //делаем обращение к целевому веб серверу, читаем частями ответ
+    int64_t resp_len = 0;
+    uint32_t write_len = 0;
+    esp_err_t err = web_client_GET(CONFIG_EXAMPLE_HTTP_HOST, CONFIG_EXAMPLE_HTTP_PORT, NULL, 0, &resp_len);
+    if ((ESP_OK == err) && (resp_len > 0)) {
+        do {
+            web_client_read_next(buffer, buf_len, &write_len);
+
+            //создаем корректную ноль-терминированную строку для последующей обработки
+            if (write_len < buf_len) {
+                memset(buffer + write_len, 0, (buf_len - write_len) + 1);                
+            }
+            ESP_LOGI(TAG, "%s", buffer);
+            //ESP_LOG_BUFFER_HEX(TAG, local_response_buffer, strlen(local_response_buffer));            
+        }
+        while(write_len > 0);
+    }
+
+    web_client_close_conn();    
+    free(buffer); 
+}
+
+
 void app_main() {
 
     usleep(3L*1000*1000); //костыль, чтобы успел подключиться монитор USB порта
@@ -51,4 +90,6 @@ void app_main() {
     //wifi_scan(10);
 
     wifi_init_sta();
+
+    get_and_read();
 }

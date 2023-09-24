@@ -345,7 +345,7 @@ void wifi_scan(uint16_t max_ap) {
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_start());
-    //для автоматической сортировки сетей можно задать параметр конфигурации sort_method типа sort_method 
+    //для автоматической сортировки сетей можно задать параметр конфигурации sort_method  
     //в структуре wifi_sta_config_t 
     //см так же wifi_sort_method_t
     esp_wifi_scan_start(NULL, true);
@@ -393,7 +393,7 @@ void wifi_init_sta(void) {
                                                         NULL,
                                                         &instance_any_id));
     ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
-                                                        IP_EVENT_STA_GOT_IP,
+                                                        ESP_EVENT_ANY_ID, //IP_EVENT_STA_GOT_IP,
                                                         &_ip_event_handler,
                                                         NULL,
                                                         &instance_got_ip));
@@ -442,3 +442,23 @@ void wifi_init_sta(void) {
         ESP_LOGE(TAG, "UNEXPECTED EVENT: bits=%" PRIu32, bits);
     }
 }
+
+/*
+Останавливаем подсистему WiFi, очищаем ресурсы
+источник https://github.com/espressif/esp-idf/blob/master/examples/bluetooth/esp_ble_mesh/coex_test/components/case/wifi_connect.c
+*/
+/*void stop(void) {
+    is_wifi_init = false;
+    ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &on_wifi_disconnect));
+    ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &on_got_ip));
+    esp_err_t err = esp_wifi_stop();
+    if (err == ESP_ERR_WIFI_NOT_INIT) {
+        return;
+    }
+    ESP_ERROR_CHECK(err);
+    ESP_ERROR_CHECK(esp_wifi_deinit());
+    ESP_ERROR_CHECK(esp_wifi_clear_default_wifi_driver_and_handlers(sta_netif));
+    esp_netif_destroy(sta_netif);
+    sta_netif = NULL;
+    //esp_netif_deinit();
+}*/
