@@ -48,7 +48,7 @@ void app_main() {
     usleep(3L*1000*1000); //костыль, чтобы успел подключиться монитор USB порта
     print_chip_info();
 
-    wifi_scan(10);
+    //wifi_scan(10);
 
-    //wifi_init_sta();
+    wifi_init_sta();
 }
