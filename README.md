@@ -7,6 +7,7 @@
 4. Желательно, использовать питание PoE
 
 ### Окружение 
+* Операционная система Ubuntu 22.04.3 LTS
 * Visual Studio Code v1.82.2
 * PlatformioIO Core v6.1.11
 * ESP-IDF v5.1.1 см инструкцию по установке https://registry.platformio.org/tools/platformio/framework-espidf

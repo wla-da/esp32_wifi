@@ -56,7 +56,7 @@ static EventGroupHandle_t s_wifi_event_group;
 static bool is_wifi_init = false;
 
 //счетчик количества попыток подключения к wifi сети
-static int s_retry_num = 0;
+static volatile int s_retry_num = 0;
 
 
 
@@ -182,10 +182,17 @@ static void _print_cipher_type(int pairwise_cipher, int group_cipher)
 */
 static void _wifi_event_handler(void* arg, esp_event_base_t event_base,
                                 int32_t event_id, void* event_data) {
-    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
+    assert(WIFI_EVENT == event_base);
+    ESP_LOGI(TAG, "WIFI_EVENT id=%" PRId32, event_id); //события WiFi определены в перечислении wifi_event_t
+
+    if (WIFI_EVENT_STA_START == event_id) {
         esp_wifi_connect();
-    } 
-    else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
+    }
+    else if (WIFI_EVENT_STA_CONNECTED == event_id) {
+        wifi_event_sta_connected_t* event = (wifi_event_sta_connected_t*) event_data; 
+        ESP_LOGI(TAG, "wi-fi success connected with auth id=%d", event->aid);
+    }
+    else if (WIFI_EVENT_STA_DISCONNECTED == event_id) {
         if (s_retry_num < EXAMPLE_ESP_MAXIMUM_RETRY) {
             esp_wifi_connect();
             s_retry_num++;
@@ -199,15 +206,45 @@ static void _wifi_event_handler(void* arg, esp_event_base_t event_base,
         //детальные причины дисконекта приведены в перечислении wifi_err_reason_t в файле esp_wifi_types.h
         ESP_LOGW(TAG,"connect to the AP fail, try=%d, reason=%d", s_retry_num, event->reason);
     } 
+    } 
     else if ((WIFI_EVENT == event_base) && (WIFI_EVENT_STA_CONNECTED == event_id)) {
         wifi_event_sta_connected_t* event = (wifi_event_sta_connected_t*) event_data; 
         ESP_LOGI(TAG, "wi-fi success connected with auth id=%d", event->aid);
     }
-    else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
+    else if ((WIFI_EVENT == event_base) && (WIFI_EVENT_STA_CONNECTED == event_id)) {
+        wifi_event_sta_connected_t* event = (wifi_event_sta_connected_t*) event_data; 
+        ESP_LOGI(TAG, "wi-fi success connected with auth id=%d", event->aid);
+}
+
+/*
+обработчик событий IP
+*/
+static void _ip_event_handler(void* arg, esp_event_base_t event_base,
+                                int32_t event_id, void* event_data) {
+    assert(IP_EVENT == event_base);
+    ESP_LOGI(TAG, "IP_EVENT id=%" PRId32, event_id);
+
+    //события, связанные с IP определены перечислением ip_event_t из файла esp_netif_types.h   
+    //    typedef enum {
+    //        IP_EVENT_STA_GOT_IP,               /*!< station got IP from connected AP */
+    //        IP_EVENT_STA_LOST_IP,              /*!< station lost IP and the IP is reset to 0 */
+    //        IP_EVENT_AP_STAIPASSIGNED,         /*!< soft-AP assign an IP to a connected station */
+    //        IP_EVENT_GOT_IP6,                  /*!< station or ap or ethernet interface v6IP addr is preferred */
+    //        IP_EVENT_ETH_GOT_IP,               /*!< ethernet got IP from connected AP */
+    //        IP_EVENT_ETH_LOST_IP,              /*!< ethernet lost IP and the IP is reset to 0 */
+    //        IP_EVENT_PPP_GOT_IP,               /*!< PPP interface got IP */
+    //        IP_EVENT_PPP_LOST_IP,              /*!< PPP interface lost IP */
+    //    } ip_event_t;
+
+    if (IP_EVENT_STA_GOT_IP == event_id) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
         ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
+        //сбрасываем счетчик попыток установки подключений
         s_retry_num = 0;
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+    }
+    else if (IP_EVENT_STA_LOST_IP == event_id) {
+        //TODO получить новый IP адрес, лучше переустановить wi-fi подключение в отдельном потоке
     }
 }
 
@@ -322,7 +359,7 @@ void wifi_init_sta(void) {
                                                         &instance_any_id));
     ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
                                                         IP_EVENT_STA_GOT_IP,
-                                                        &_wifi_event_handler,
+                                                        &_ip_event_handler,
                                                         NULL,
                                                         &instance_got_ip));
 
