@@ -26,6 +26,8 @@ https://github.com/espressif/esp-idf/blob/master/examples/wifi/scan/main/scan.c
 #include "esp_log.h"
 #include "esp_err.h"
 #include "esp_wifi.h"
+#include "esp_netif.h"
+#include "esp_mac.h"
 #include "nvs_flash.h"
 #include "math.h"
 
@@ -57,6 +59,8 @@ static bool is_wifi_init = false;
 
 //счетчик количества попыток подключения к wifi сети
 static volatile int s_retry_num = 0;
+
+static esp_netif_t *sta_netif;
 
 
 
@@ -206,14 +210,6 @@ static void _wifi_event_handler(void* arg, esp_event_base_t event_base,
         //детальные причины дисконекта приведены в перечислении wifi_err_reason_t в файле esp_wifi_types.h
         ESP_LOGW(TAG,"connect to the AP fail, try=%d, reason=%d", s_retry_num, event->reason);
     } 
-    } 
-    else if ((WIFI_EVENT == event_base) && (WIFI_EVENT_STA_CONNECTED == event_id)) {
-        wifi_event_sta_connected_t* event = (wifi_event_sta_connected_t*) event_data; 
-        ESP_LOGI(TAG, "wi-fi success connected with auth id=%d", event->aid);
-    }
-    else if ((WIFI_EVENT == event_base) && (WIFI_EVENT_STA_CONNECTED == event_id)) {
-        wifi_event_sta_connected_t* event = (wifi_event_sta_connected_t*) event_data; 
-        ESP_LOGI(TAG, "wi-fi success connected with auth id=%d", event->aid);
 }
 
 /*
@@ -280,11 +276,13 @@ static void _init_wifi_default() {
         return;
     }
 
+    sta_netif = NULL;
+
     _init_nvs();
 
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
-    esp_netif_t *sta_netif = esp_netif_create_default_wifi_sta();
+    sta_netif = esp_netif_create_default_wifi_sta();
     assert(sta_netif);
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
@@ -293,6 +291,43 @@ static void _init_wifi_default() {
     //успешно завершили инициализацию подсистемы WiFi
     is_wifi_init = true;
     ESP_LOGI(TAG, "Wi-Fi init complete!");
+}
+
+
+/*
+распечатать IP адреса шлюза, клиента, маску сети, mac
+*/
+static void _print_tcpip_info() {
+    assert(sta_netif != NULL);
+
+    //читаем mac адреса разными способами
+    uint8_t mac = 0;
+    esp_efuse_mac_get_default(&mac);
+    ESP_LOGI(TAG, "Efuse MAC:\t"MACSTR, MAC2STR(&mac));
+
+    mac = 0;
+    esp_base_mac_addr_get(&mac);
+    ESP_LOGI(TAG, "Base MAC:\t"MACSTR, MAC2STR(&mac));
+
+    mac = 0;
+    esp_read_mac(&mac, ESP_MAC_WIFI_STA);
+    ESP_LOGI(TAG, "STA MAC:\t"MACSTR, MAC2STR(&mac));
+
+    mac = 0;
+    esp_read_mac(&mac, ESP_MAC_ETH);
+    ESP_LOGI(TAG, "Ether MAC:\t"MACSTR, MAC2STR(&mac));
+
+    mac = 0;
+    esp_netif_get_mac(sta_netif, &mac);
+    ESP_LOGI(TAG, "WiFi MAC:\t"MACSTR, MAC2STR(&mac));
+      
+    //получаем IP адреса шлюза, станции, маску подсети
+    esp_netif_ip_info_t ip_info;
+    esp_netif_get_ip_info(sta_netif, &ip_info);
+
+    ESP_LOGI(TAG, "My IP:\t" IPSTR, IP2STR(&ip_info.ip));
+    ESP_LOGI(TAG, "Gateway IP:\t" IPSTR, IP2STR(&ip_info.gw));
+    ESP_LOGI(TAG, "Netmask:\t" IPSTR, IP2STR(&ip_info.netmask));
 }
 
 
@@ -335,7 +370,7 @@ void wifi_scan(uint16_t max_ap) {
         ESP_LOGI(TAG, "Channel \t%d", ap_info[i].primary);
     }
 
-    //esp_wifi_clear_ap_list();//очистим память после сканирования
+    esp_wifi_clear_ap_list();//очистим память после сканирования
     ESP_LOGI(TAG, "Scan Wi-Fi net's is complete!\n");
 }
 
@@ -383,8 +418,8 @@ void wifi_init_sta(void) {
 
     ESP_LOGI(TAG, "Wi-Fi connecting waiting...");
 
-    //Waiting until either the connection is established (WIFI_CONNECTED_BIT) or connection failed for the maximum
-    //number of re-tries (WIFI_FAIL_BIT). The bits are set by _wifi_event_handler() (see above)
+    //ожидаем либо установки битов (WIFI_CONNECTED_BIT | WIFI_FAIL_BIT) с учетом попыток переподкючения, либо 
+    //завершения времени ожидания EXAMPLE_ESP_MAX_WAIT_CONNECT_MS
     EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group,
             WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
             pdFALSE,
@@ -396,10 +431,14 @@ void wifi_init_sta(void) {
     if (bits & WIFI_CONNECTED_BIT) {
         ESP_LOGI(TAG, "Connected to ap SSID:%s password:%s",
                  EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS);
-    } else if (bits & WIFI_FAIL_BIT) {
+        //получим назначенный нам IP адрес и IP адрес шлюза 
+        _print_tcpip_info();
+    } 
+    else if (bits & WIFI_FAIL_BIT) {
         ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s",
                  EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS);
-    } else {
+    } 
+    else {
         ESP_LOGE(TAG, "UNEXPECTED EVENT: bits=%" PRIu32, bits);
     }
 }
