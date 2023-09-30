@@ -49,6 +49,7 @@
         "istream": "c",
         "limits": "c",
         "math.h": "c",
-        "esp_err.h": "c"
+        "esp_err.h": "c",
+        "http_parser.h": "c"
     }
 }

@@ -4,6 +4,10 @@
 
 в ESP-IDF есть компонент ESP HTTP Client
 https://docs.espressif.com/projects/esp-idf/en/v5.1.1/esp32/api-reference/protocols/esp_http_client.html
+https://github.com/espressif/esp-idf/blob/release/v5.1/components/esp_http_client/esp_http_client.c 
+
+ESP-IFD есть компонент HTTP Parser
+https://github.com/espressif/esp-idf/blob/release/v5.1/components/http_parser/http_parser.c
 
 
 в устройстве мало оперативной памяти, вычитать всё содержимое ответа за один запрос сервера нельзя - не хватит памяти

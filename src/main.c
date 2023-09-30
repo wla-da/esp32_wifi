@@ -12,7 +12,7 @@
 #include "webclient.h"
 
 
-#define CONFIG_EXAMPLE_HTTP_HOST        "192.168.4.73"
+#define CONFIG_EXAMPLE_HTTP_HOST        "192.168.4.1"
 #define CONFIG_EXAMPLE_HTTP_PORT        80
 
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
