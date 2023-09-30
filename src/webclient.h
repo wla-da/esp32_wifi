@@ -26,6 +26,13 @@ int64_t web_client_get_data_len();
 bool web_client_is_http_ok();
 
 /*
+пытается определить на основе http заголовков сервера текстовых контент или нет
+если определить тип контента не получилось так же возвращает false
+возвращает true, если Content-type начинается с "text/" (text/css,text/csv,text/html,text/javascript,text/plain,text/xml etc)
+*/
+bool is_text_content();
+
+/*
 отправить GET запрос на хост с указанными заголовками
 @param *resp_len uint32_t возвращает длину ответа либо -1, если не возможно определить
 */

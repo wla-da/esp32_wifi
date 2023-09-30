@@ -15,9 +15,9 @@ https://github.com/espressif/esp-idf/blob/release/v5.1/components/http_parser/ht
 
 
 Типовое использование простого веб клиента
-1. отправить запрос на сервер GET(...), проверить возвращенный код
+1. отправить запрос на сервер web_client_GET(...), проверить возвращенный код
 2. проверить ответ сервера web_client_is_http_ok()
-3. TODO получить тип файла is_text_content()/сырые заголовки get_response_header_raw() 
+3. получить тип содержимого сервера is_text_content()/сырые заголовки get_response_header_raw() 
 4. вычитывать ответ сервера в буфер web_client_read_next(...), пока не будет вычитан полностью либо не произойдет ошибка
 5. закрыть подключение web_client_close_conn() 
 
@@ -57,8 +57,16 @@ https://github.com/espressif/esp-idf/blob/master/components/esp_netif/lwip/esp_n
 
 #include "webclient.h"
 
+
+#define HTTP_HEADER_CONTENT_TYPE                "content-type"
+#define HTTP_HEADER_CONTENT_TYPE_TEXT_STARTS     "text/"
+
+//типы поддерживаемого сжатия контента, см https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Encoding
+#define HTTP_HEADER_ACCEPT_ENCODING             "Accept-Encoding"
+#define HTTP_HEADER_ACCEPT_ENCODING_VALUES      "identity"
+
 //таймаут HTTP запроса
-#define CONFIG_EXAMPLE_HTTP_TIMEOUT_MS  5*1000
+#define CONFIG_HTTP_TIMEOUT_MS  5*1000
 
 
 #define TAG "WEB_CLIENT"
@@ -67,6 +75,34 @@ https://github.com/espressif/esp-idf/blob/master/components/esp_netif/lwip/esp_n
 static volatile esp_http_client_handle_t client = NULL;
 //курсор чтения ответа сервера
 static volatile int64_t current_read_pos = 0;
+//является ли контент, переданный сервером, текстовым
+static volatile bool is_text_content_resp = false;
+
+
+
+/*
+обработчик событий html парсера
+*/
+static esp_err_t _on_http_event(esp_http_client_event_t *event) {
+    //см так же https://esp32.com/viewtopic.php?f=13&t=21598
+    if (HTTP_EVENT_ON_HEADER != event->event_id) {
+        return ESP_OK;
+    }
+    
+    ESP_LOGI(TAG, "HTTP [%s]:[%s]", event->header_key, event->header_value);
+
+    if (strcasecmp(HTTP_HEADER_CONTENT_TYPE, event->header_key) != 0) {
+        return ESP_OK;
+    }
+
+    if (strncasecmp(HTTP_HEADER_CONTENT_TYPE_TEXT_STARTS, 
+                    event->header_value, 
+                    strlen(HTTP_HEADER_CONTENT_TYPE_TEXT_STARTS)) == 0) {
+        ESP_LOGI(TAG, "HTTP response is text: [%s]:[%s]", event->header_key, event->header_value);
+        is_text_content_resp = true;        
+    } 
+    return ESP_OK;
+}
 
 
 /*
@@ -85,11 +121,17 @@ esp_err_t web_client_GET(char * host, int port, char * header, const uint8_t hea
         //.url = "http://"CONFIG_EXAMPLE_HTTP_ENDPOINT"/get",
         .host = host,
         .port = port,
-        .path = "/",
+        .path = "/production.png",
         .transport_type = HTTP_TRANSPORT_OVER_TCP,
+        //ставим обработчик событий HTTP парсера для обработки HTTP заголовков
+        .event_handler = _on_http_event,
     };
 
     client = esp_http_client_init(&config);
+    assert(NULL != client);
+    //пока не поддерживаем сжатие 
+    esp_http_client_set_header(client, HTTP_HEADER_ACCEPT_ENCODING, HTTP_HEADER_ACCEPT_ENCODING_VALUES);
+
     esp_err_t err;
     if ((err = esp_http_client_open(client, 0)) != ESP_OK) {
         ESP_LOGE(TAG, "Failed to open HTTP connection: %s", esp_err_to_name(err));
@@ -97,7 +139,7 @@ esp_err_t web_client_GET(char * host, int port, char * header, const uint8_t hea
         return err;
     }
 
-    esp_http_client_set_timeout_ms(client, CONFIG_EXAMPLE_HTTP_TIMEOUT_MS);
+    esp_http_client_set_timeout_ms(client, CONFIG_HTTP_TIMEOUT_MS);
 
     //TODO поддержка установки HTTP заголовков
     //esp_http_client_set_header(client, );
@@ -162,10 +204,13 @@ bool web_client_is_http_ok() {
 
 /*
 пытается определить на основе http заголовков сервера текстовых контент или нет
+если определить тип контента не получилось так же возвращает false
+возвращает true, если Content-type начинается с "text/" (text/css,text/csv,text/html,text/javascript,text/plain,text/xml etc)
 */
 bool is_text_content() {
-    //TODO
-    return false;
+    assert(client != NULL);
+    //см https://esp32.com/viewtopic.php?f=13&t=21598
+    return is_text_content_resp;
 }
 
 /*
@@ -231,6 +276,7 @@ void web_client_close_conn() {
     }
     client = NULL;
     current_read_pos = 0;
+    is_text_content_resp = false;
     ESP_LOGI(TAG, "Connection closed");
 }
 

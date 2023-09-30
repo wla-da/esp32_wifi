@@ -12,8 +12,8 @@
 #include "webclient.h"
 
 
-#define CONFIG_EXAMPLE_HTTP_HOST        "192.168.4.1"
-#define CONFIG_EXAMPLE_HTTP_PORT        80
+#define CONFIG_HTTP_HOST        "192.168.4.1"
+#define CONFIG_HTTP_PORT        80
 
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #define TAG "MAIN"
@@ -62,7 +62,7 @@ void get_and_read() {
     //делаем обращение к целевому веб серверу, читаем частями ответ
     int64_t resp_len = 0;
     uint32_t write_len = 0;
-    esp_err_t err = web_client_GET(CONFIG_EXAMPLE_HTTP_HOST, CONFIG_EXAMPLE_HTTP_PORT, NULL, 0, &resp_len);
+    esp_err_t err = web_client_GET(CONFIG_HTTP_HOST, CONFIG_HTTP_PORT, NULL, 0, &resp_len);
     if ((ESP_OK == err) && (resp_len > 0)) {
         do {
             web_client_read_next(buffer, buf_len, &write_len);

@@ -8,8 +8,10 @@
 
 ## Окружение 
 * Операционная система Ubuntu 22.04.3 LTS
-* Visual Studio Code v1.82.2
-* PlatformioIO Core v6.1.11
+* Visual Studio Code v1.82.2 c плагинами:
+    * [PlatformioIO Core](https://platformio.org/?utm_source=platformio&utm_medium=piohome)  v6.1.11
+    * [Todo Tree](https://marketplace.visualstudio.com/items?itemName=Gruntfuggly.todo-tree)
+    * [GitHub Markdown Preview](https://marketplace.visualstudio.com/items?itemName=bierner.github-markdown-preview)
 * ESP-IDF v5.1.1 см инструкцию по установке https://registry.platformio.org/tools/platformio/framework-espidf
 * Плата esp32doit-devkit-v1, пока без LAN ![esp32doit-devkit-v1](/img/esp32_devkit_v1.png) стоит припаять кондесатор 4,7-10 мкф параллельно кнопке EN, обеспечивает более стабильную перезагрузку платы при прошивке, не требуется нажимать кнопки, [подробнее]( https://esp8266.ru/forum/threads/v-klon-esp32-devkit-v1-avtomaticheski-ne-zalivaetsja-proshivka.4072/)
 * Существует плата esp32 с PoE на борту "T-Internet-POE" от Lilygo ~2800 руб на осень 2023 https://www.lilygo.cc/products/t-internet-poe пример использования https://habr.com/ru/articles/547044/ 
