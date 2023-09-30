@@ -44,7 +44,7 @@
 Стоимость платы WT32-ETH01 на осень 2023 порядка 900-1100 руб.
 
 Предварительно выбрана плата T-Internet-POE от Lilygo в силу доступности, наличия документации и опыта использования, сравнительно невысокой цены.\
-Так же интересной выглядит плата PoESP32 от M5Stack, имеет пластиковый корпус, небольшие размеры, прошивка "из коробки" поддерживает AT команды.\  
+Так же интересной выглядит плата PoESP32 от M5Stack, имеет пластиковый корпус, небольшие размеры, прошивка "из коробки" поддерживает AT команды.\
 См примеры других плат esp32 с PoE далее.
 
 ### Примеры плат esp32 с PoE
@@ -52,11 +52,11 @@
 | Модуль | Фото | Цена на осень 2023, тыс руб  | Ссылка  |
 |----|---|---|---|
 | ESP32-Ethernet-Kit от Espressif</br></br>[ESP32-Ethernet-Kit V1.2](https://docs.espressif.com/projects/esp-idf/en/release-v5.1/esp32/hw-reference/esp32/get-started-ethernet-kit.html)</br>[ESP32-Ethernet-Kit V1.1](https://docs.espressif.com/projects/esp-idf/en/release-v4.1/hw-reference/get-started-ethernet-kit.html#get-started-esp32-ethernet-kit-v1-1) | ![ESP32-Ethernet-Kit V1.2](/img/esp32-ethernet-kit-v1.2-overview.png)  | 8-10 | [Ali ESP32-Ethernet-Kit v1.2](https://aliexpress.ru/item/1005004066004397.html?sku_id=12000027924152484)  |
-|[T-Internet-POE](https://www.lilygo.cc/products/t-internet-poe) от lilygo |![T-Internet-POE](/img/T-Internet-POE-Lilygo_11.png)|2,8-3,2 включая программатор| [Ali T-Internet-POE](https://aliexpress.ru/item/4001122992446.html) |
+|[T-Internet-POE](https://www.lilygo.cc/products/t-internet-poe) от Lilygo |![T-Internet-POE](/img/T-Internet-POE-Lilygo_11.png)|2,8-3,2 включая программатор| [Ali T-Internet-POE](https://aliexpress.ru/item/4001122992446.html) |
 |[wESP32](https://www.crowdsupply.com/silicognition/wesp32)|![wesp32](/img/wesp32-top.jpg)|~7 с программатором + доставка отдельно|[Tindie wESP32](https://www.tindie.com/products/silicognition/wesp32/)|
 |[PoESP32](https://docs.m5stack.com/en/unit/poesp32) от M5Stack|![PoESP32](/img/poesp32_01.png)|~3|[M5Stack PoESP32](https://shop.m5stack.com/products/esp32-ethernet-unit-with-poe)  [Ali PoESP32](https://aliexpress.ru/item/1005004106438265.html)|
 |Esp32-Stick-PoE-A от [Aleksei Karavaev](https://www.tindie.com/products/allexok/esp32-stick-poe-a16mb-flash/)|![Esp32-Stick-PoE-A](/img/Esp32-Stick-PoE-A.jpg)|~2,7 с программатором + доставка отдельно|[Tindie Esp32-Stick-PoE-A](https://www.tindie.com/products/allexok/esp32-stick-poe-a16mb-flash/)|
-|ESP32-POE open source hardware|![ESP32-POE](/img/ESP32-POE.jpg)|~2 с программатором + доставка отдельно|[ESP32-POE](https://www.olimex.com/Products/IoT/ESP32/ESP32-POE/open-source-hardware)|
+|ESP32-POE [open source hardware](https://github.com/OLIMEX/ESP32-POE/)|![ESP32-POE](/img/ESP32-POE.jpg)|~2 без программатора + доставка отдельно|[ESP32-POE](https://www.olimex.com/Products/IoT/ESP32/ESP32-POE/open-source-hardware)|
 
 
 
