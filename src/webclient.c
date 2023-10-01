@@ -55,6 +55,8 @@ https://github.com/espressif/esp-idf/blob/master/components/esp_netif/lwip/esp_n
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
+#include "miniz.h" //встроенная библиотека сжатия/распаковки zlib https://github.com/richgel999/miniz/
+
 #include "webclient.h"
 
 
@@ -121,7 +123,7 @@ esp_err_t web_client_GET(char * host, int port, char * header, const uint8_t hea
         //.url = "http://"CONFIG_EXAMPLE_HTTP_ENDPOINT"/get",
         .host = host,
         .port = port,
-        .path = "/production.png",
+        .path = "/",// "/production.png",
         .transport_type = HTTP_TRANSPORT_OVER_TCP,
         //ставим обработчик событий HTTP парсера для обработки HTTP заголовков
         .event_handler = _on_http_event,
@@ -224,6 +226,50 @@ int64_t web_client_get_data_len() {
 
 
 /*
+пробует распаковать переданные gzip данные в переданный буфер (данные будут перезатерты)
+использует zlib, сделана по мотивам https://yuanze.wang/posts/esp32-unzip-gzip-http-response/
+встроенный в esp-idf miniz сильно обрезан, нет функций для работы с архивами https://www.esp32.com/viewtopic.php?t=1076
+возвращает true в случае успеха распаковки данных, false в иных случаях
+*/
+bool static _ungzip(char * buffer, uint32_t *byte_count, const uint32_t buf_len) {
+    mz_uint8 *buf_uncompress = malloc(TINFL_LZ_DICT_SIZE);
+    tinfl_decompressor *decomp = calloc(1, sizeof(tinfl_decompressor));
+    assert(decomp != NULL);
+    tinfl_init(decomp);
+
+    //используем библиотеку miniz для распаковки данных
+    //size_t res = tinfl_decompress_mem_to_mem(
+    //    buf_uncompress,  /*выходной буфер */
+    //    TINFL_LZ_DICT_SIZE,  /*размер выходного буфера, должен быть степенью двойки и не меньше TINFL_LZ_DICT_SIZE 32кБ*/
+    //   buffer, *byte_count, /*входной буфер с сжатыми данными*/
+    //    TINFL_FLAG_PARSE_ZLIB_HEADER /*никаких флагов не передаем*/);
+    size_t outbytes = TINFL_LZ_DICT_SIZE;
+    size_t inbytes = *byte_count;
+    ESP_LOGI(TAG, "Uncompress inbytes=%d, outbytes=%d", inbytes, outbytes);
+    tinfl_status decomp_status = tinfl_decompress(decomp, 
+                                    (mz_uint8 *) buffer, &inbytes, 
+                                    buf_uncompress, &buf_uncompress[TINFL_LZ_DICT_SIZE], &outbytes, 
+                                    TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF);
+    ESP_LOGI(TAG, "Uncompress status=%d, inbytes=%d, outbytes=%d", decomp_status, inbytes, outbytes);
+    //if (TINFL_DECOMPRESS_MEM_TO_MEM_FAILED == res) {
+    if (TINFL_STATUS_DONE != decomp_status) {
+        free(buf_uncompress);
+        free(decomp);
+        byte_count = 0;
+        ESP_LOGW(TAG, "Uncompress is failed, code=%d!", decomp_status);
+        return false;
+    }
+    //копируем распакованные данные в переданный буфер
+    //if (*byte_count > res) {
+    //    *byte_count = res;
+    //}
+    memcpy(buffer, buf_uncompress, *byte_count);
+    free(buf_uncompress);
+    free(decomp);
+    return true;
+}
+
+/*
 прочитать очередную часть ответа сервера
 */
 esp_err_t web_client_read_next(char * buffer, const uint32_t buf_len, uint32_t * write_len) {
@@ -249,6 +295,8 @@ esp_err_t web_client_read_next(char * buffer, const uint32_t buf_len, uint32_t *
     if (read_len > 0) {
         current_read_pos += read_len;
         *write_len = read_len;
+        //если данные запакованы, распакуем их
+        _ungzip(buffer, write_len, buf_len);
         return ESP_OK;
     }
     else if (ESP_FAIL == read_len) {

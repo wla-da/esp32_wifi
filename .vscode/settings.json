@@ -58,6 +58,9 @@
         "type_traits": "c",
         "utility": "c",
         "esp_http_client.h": "c",
-        "socket.h": "c"
+        "socket.h": "c",
+        "miniz.h": "c",
+        "webclient.h": "c",
+        "esp_rom_caps.h": "c"
     }
 }

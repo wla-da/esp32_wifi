@@ -72,7 +72,7 @@ void get_and_read() {
                 memset(buffer + write_len, 0, (buf_len - write_len) + 1);                
             }
             ESP_LOGI(TAG, "%s", buffer);
-            //ESP_LOG_BUFFER_HEX(TAG, local_response_buffer, strlen(local_response_buffer));            
+            ESP_LOG_BUFFER_HEX(TAG, buffer, write_len);            
         }
         while(write_len > 0);
     }
