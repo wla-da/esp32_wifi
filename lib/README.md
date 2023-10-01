@@ -1,4 +1,7 @@
+# Библиотеки
+1. Библиотека [miniz](/lib/miniz/README.md) для распаковки сжатого контента веб-сервера
 
+# Об структуре каталога lib от PlatformIO
 This directory is intended for project specific (private) libraries.
 PlatformIO will compile them to static libraries and link into executable file.
 
@@ -6,7 +9,7 @@ The source code of each library should be placed in a an own separate directory
 ("lib/your_library_name/[here are source files]").
 
 For example, see a structure of the following two libraries `Foo` and `Bar`:
-
+```
 |--lib
 |  |
 |  |--Bar
@@ -26,7 +29,7 @@ For example, see a structure of the following two libraries `Foo` and `Bar`:
 |- platformio.ini
 |--src
    |- main.c
-
+```
 and a contents of `src/main.c`:
 ```
 #include <Foo.h>
