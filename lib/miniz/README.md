@@ -6,8 +6,7 @@
 Детальнее о 
 HTTP заголовке [Accept-Encoding](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Encoding)
 2. В esp-idf v5.1 нет явной поддержки сжатия/распаковки compress (LZ-алгоритм)/gzip/deflate/brotli, которую используют веб-сервера для сжатия контента.
-3. В esf-idf есть сильно обрезанная библиотека [miniz](https://github.com/richgel999/miniz) версии 9.1.15 для esp-idf 5.1.\
-Находится в ROM памяти, заголовочный файл [miniz.h](https://github.com/espressif/esp-idf/blob/master/components/esp_rom/include/miniz.h). Данная библиотека предлагает несколько функций для работы с низкоуровневым сжатием/распаковки, таких как: 
+3. В esf-idf есть сильно обрезанная библиотека [miniz](https://github.com/richgel999/miniz). Версия miniz 9.1.15 для esp-idf 5.1. Скомпилированная библиотека miniz находится в ROM памяти. Смотреть заголовочный файл [miniz.h](https://github.com/espressif/esp-idf/blob/master/components/esp_rom/include/miniz.h). Данная библиотека предлагает несколько функций для работы с низкоуровневым сжатием/распаковки, таких как: 
 ``` 
 ....
 tinfl_decompressor *decomp = calloc(1, sizeof(tinfl_decompressor));
@@ -19,7 +18,7 @@ tinfl_status decomp_status = tinfl_decompress(decomp,
                                     TINFL_FLAG_PARSE_ZLIB_HEADER);
 ...
 ``` 
-4. В обрезанной версии miniz удалены функции вида mz_uncompress и ряд других функций вида mz_XXX путем взведения флага  ```MINIZ_NO_ZLIB_APIS``` в miniz.h. При попытке использовать функцию mz_uncompress компоновщик не может собрать итоговый бинарный файл из-за отсутствий функции в предоставляемом производителем объектом файле, смотри список экспортируемых функций в [esp32.rom.ld](https://github.com/espressif/esp-idf/blob/master/components/esp_rom/esp32/ld/esp32.rom.ld), есть только примитивы вида tinfl_ХХХ
+4. В обрезанной версии miniz удалена функция вида mz_uncompress и ряд других необходимых для распаковки gzip функций вида mz_XXX путем взведения флага  ```MINIZ_NO_ZLIB_APIS``` в miniz.h. При попытке использовать функцию mz_uncompress компоновщик не может собрать итоговый бинарный файл из-за отсутствий функции в предоставляемом производителем объектом файле. Смотреть список экспортируемых функций в [esp32.rom.ld](https://github.com/espressif/esp-idf/blob/master/components/esp_rom/esp32/ld/esp32.rom.ld), есть только примитивы вида tinfl_ХХХ
 5. В утилитах прошивальщика от Espressif есть полная версия доработанная под esp32 версия файла [miniz.c](https://github.com/espressif/esptool/blob/master/flasher_stub/miniz.c). Файл miniz.c производитель уже переносил из другого раздела, актуальность ссылки обеспечена на осень 2023.
 
 
