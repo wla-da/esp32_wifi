@@ -61,6 +61,8 @@
         "socket.h": "c",
         "miniz.h": "c",
         "webclient.h": "c",
-        "esp_rom_caps.h": "c"
+        "esp_rom_caps.h": "c",
+        "miniz_common.h": "c",
+        "miniz_tinfl.h": "c"
     }
 }

@@ -51,7 +51,7 @@ void print_chip_info() {
 
 
 void get_and_read() {
-    const uint32_t buf_len = 1024;
+    const uint32_t buf_len = 50*1024;
     char *buffer = malloc(buf_len + 1);
     memset(buffer, 0, buf_len + 1);
     if (buffer == NULL) {
@@ -72,7 +72,7 @@ void get_and_read() {
                 memset(buffer + write_len, 0, (buf_len - write_len) + 1);                
             }
             ESP_LOGI(TAG, "%s", buffer);
-            ESP_LOG_BUFFER_HEX(TAG, buffer, write_len);            
+            //ESP_LOG_BUFFER_HEX(TAG, buffer, write_len);            
         }
         while(write_len > 0);
     }
@@ -80,6 +80,7 @@ void get_and_read() {
     web_client_close_conn();    
     free(buffer); 
 }
+
 
 
 void app_main() {
